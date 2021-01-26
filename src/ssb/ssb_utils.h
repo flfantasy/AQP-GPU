@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define SF 20
+#define SF 1
 
 #define BASE_PATH "/home/zhaoh/crystal/test/ssb/data/"
 

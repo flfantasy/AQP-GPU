@@ -70,7 +70,7 @@ __global__ void QueryKernel(int* lo_orderdate, int* lo_discount, int* lo_quantit
 
   __syncthreads();
 
-  // 共享变量buffer存储中间结果
+  // buffer用于存储每个warp的sum，最多支持32个warp
   static __shared__ long long buffer[32];
   
   unsigned long long aggregate = BlockSum<long long, BLOCK_THREADS, ITEMS_PER_THREAD>(sum, (long long*)buffer);
@@ -84,13 +84,14 @@ __global__ void QueryKernel(int* lo_orderdate, int* lo_discount, int* lo_quantit
 // 此函数主要是记录核函数的时间，传入四列数组（的显存地址）
 float runQuery(int* lo_orderdate, int* lo_discount, int* lo_quantity, int* lo_extendedprice, 
     int lo_num_entries, cub::CachingDeviceAllocator&  g_allocator) {
-  // 注册start、stop事件
+  // cuda注册start、stop事件
   SETUP_TIMING();
 
   float time_query;
   chrono::high_resolution_clock::time_point st, finish;
   st = chrono::high_resolution_clock::now();
 
+	// 记录start事件的时间
   cudaEventRecord(start, 0);
 
   unsigned long long* d_sum = NULL;
@@ -104,9 +105,10 @@ float runQuery(int* lo_orderdate, int* lo_discount, int* lo_quantity, int* lo_ex
   QueryKernel<128,4><<<num_blocks, 128>>>(lo_orderdate, 
           lo_discount, lo_quantity, lo_extendedprice, lo_num_entries, d_sum);
 
-  // 计算时间
+  // 记录stop事件的时间
   cudaEventRecord(stop, 0);
   cudaEventSynchronize(stop);
+	// 计算执行时间到time_query, time_query = kernel执行时间
   cudaEventElapsedTime(&time_query, start,stop);
 
   unsigned long long revenue;
@@ -115,14 +117,12 @@ float runQuery(int* lo_orderdate, int* lo_discount, int* lo_quantity, int* lo_ex
   finish = chrono::high_resolution_clock::now();
   std::chrono::duration<double> diff = finish - st;
 
-  // diff = cpu数据传给gpu时间 + gpu执行时间
+  // diff = kernel执行时间 + gpu结果传回cpu时间
   cout << "Revenue: " << revenue << endl;
   cout << "Time Taken Total: " << diff.count() * 1000 << endl;
 
   CLEANUP(d_sum);
-  // time_query = diff + 结果传回cpu时间
   return time_query;
-}
 
 /**
  * Main

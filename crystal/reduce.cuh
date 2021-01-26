@@ -19,7 +19,7 @@ __device__ __forceinline__ T BlockSum(
     val += __shfl_down_sync(0xffffffff, val, offset);
   }
 
-  // 将index为wid的warp的sum存入shared[wid]内。
+  // 将每个warp中第一个线程的val（此时已存有整个warp的sum）存入shared数组中
   if (lane == 0) {
     shared[wid] = val;
   }
