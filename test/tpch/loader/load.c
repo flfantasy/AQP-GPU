@@ -8,19 +8,17 @@
 #include <string.h>
 #include <getopt.h>
 #include <linux/limits.h>
-#include "include/schema.h"
-#include "include/common.h"
+#include "../include/schema.h"
+#include "../include/common.h"
 
 #define CHECK_POINTER(p) do {\
   if(p == NULL){   \
     perror("Failed to allocate host memory");    \
     exit(-1);  \
   }} while(0)
-
 static char delimiter = '|';
-
-// fp路径为"tpch/data/s*/supplier.tbl", outName = "SUPPLIER"
 void supplier (FILE *fp, char *outName){
+
   struct supplier tmp;
   char data [1024] = {0};
   char buf[1024] = {0};
@@ -31,7 +29,6 @@ void supplier (FILE *fp, char *outName){
   for(i=0;i<7;i++){
     char path[PATH_MAX] = {0};
     sprintf(path,"%s%d",outName,i);
-    // 每列一个out
     out[i] = fopen(path, "w");
     if(!out[i]){
       printf("Failed to open %s\n",path);
@@ -50,26 +47,25 @@ void supplier (FILE *fp, char *outName){
     tupleUnit = BLOCKNUM;
   else
     tupleUnit = tupleNum;
-  // tupleNum最大限制为BLOCKNUM
   header.tupleNum = tupleUnit;
   header.format = UNCOMPRESSED;
   header.blockId = 0;
   header.blockTotal = (tupleNum + BLOCKNUM -1) / BLOCKNUM ;
   fseek(fp,0,SEEK_SET);
-/*  header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[0]);*/
-  /*header.blockSize = header.tupleNum * 25;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[1]);*/
-  /*header.blockSize = header.tupleNum * 25;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[2]);*/
-  /*header.blockSize = header.tupleNum * 10;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[3]);*/
-  /*header.blockSize = header.tupleNum * 15;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[4]);*/
-  /*header.blockSize = header.tupleNum * 12;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[5]);*/
-  /*header.blockSize = header.tupleNum * 15;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[6]);*/
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[0]);
+  header.blockSize = header.tupleNum * 25;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[1]);
+  header.blockSize = header.tupleNum * 25;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[2]);
+  header.blockSize = header.tupleNum * 10;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[3]);
+  header.blockSize = header.tupleNum * 15;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[4]);
+  header.blockSize = header.tupleNum * 12;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[5]);
+  header.blockSize = header.tupleNum * 15;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[6]);
   while(fgets(buf,sizeof(buf),fp)!= NULL){
     int writeHeader = 0;
     tupleCount ++;
@@ -87,7 +83,6 @@ void supplier (FILE *fp, char *outName){
     for(i = 0, prev = 0,count=0; buf[i] !='\n';i++){
       if (buf[i] == delimiter){
         memset(data,0,sizeof(data));
-        // get the data of one column
         strncpy(data,buf+prev,i-prev);
         prev = i+1;
         switch(count){
@@ -120,27 +115,24 @@ void supplier (FILE *fp, char *outName){
               header.blockSize = header.tupleNum * 10;
               fwrite(&header,sizeof(struct columnHeader),1,out[3]);
             }
-            int s_city = strtol(data, NULL, 10);
-            /*strcpy(tmp.s_city,data);*/
-            fwrite(&(s_city),sizeof(int), 1, out[3]);
+            strcpy(tmp.s_city,data);
+            fwrite(&(tmp.s_city),sizeof(tmp.s_city), 1, out[3]);
             break;
            case 4:
             if(writeHeader == 1){
               header.blockSize = header.tupleNum * 15;
               fwrite(&header,sizeof(struct columnHeader),1,out[4]);
             }
-            int s_nation = strtol(data, NULL, 10);
-            /*strcpy(tmp.s_nation,data);*/
-            fwrite(&(s_nation),sizeof(int), 1, out[4]);
+            strcpy(tmp.s_nation,data);
+            fwrite(&(tmp.s_nation),sizeof(tmp.s_nation), 1, out[4]);
             break;
            case 5:
             if(writeHeader == 1){
               header.blockSize = header.tupleNum * 12;
               fwrite(&header,sizeof(struct columnHeader),1,out[5]);
             }
-            int s_region = strtol(data, NULL, 10);
-            /*strcpy(tmp.s_region,data);*/
-            fwrite(&(s_region),sizeof(int), 1, out[5]);
+            strcpy(tmp.s_region,data);
+            fwrite(&(tmp.s_region),sizeof(tmp.s_region), 1, out[5]);
             break;
            case 6:
             if(writeHeader == 1){
@@ -170,8 +162,8 @@ void supplier (FILE *fp, char *outName){
 
 }
 
-// fp路径为"tpch/data/s*/customer.tbl", outName = "CUSTOMER"
 void customer (FILE *fp, char *outName){
+
   struct customer tmp;
   char data [1024] = {0};
   char buf[1024] = {0};
@@ -205,22 +197,22 @@ void customer (FILE *fp, char *outName){
   header.blockId = 0;
   header.blockTotal = (tupleNum + BLOCKNUM -1) / BLOCKNUM ;
   fseek(fp,0,SEEK_SET);
-/*  header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[0]);*/
-  /*header.blockSize = header.tupleNum * 25;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[1]);*/
-  /*header.blockSize = header.tupleNum * 25;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[2]);*/
-  /*header.blockSize = header.tupleNum * 10;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[3]);*/
-  /*header.blockSize = header.tupleNum * 15;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[4]);*/
-  /*header.blockSize = header.tupleNum * 12;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[5]);*/
-  /*header.blockSize = header.tupleNum * 15;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[6]);*/
-  /*header.blockSize = header.tupleNum * 10;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[7]);*/
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[0]);
+  header.blockSize = header.tupleNum * 25;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[1]);
+  header.blockSize = header.tupleNum * 25;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[2]);
+  header.blockSize = header.tupleNum * 10;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[3]);
+  header.blockSize = header.tupleNum * 15;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[4]);
+  header.blockSize = header.tupleNum * 12;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[5]);
+  header.blockSize = header.tupleNum * 15;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[6]);
+  header.blockSize = header.tupleNum * 10;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[7]);
   while(fgets(buf,sizeof(buf),fp)!= NULL){
     int writeHeader = 0;
     tupleCount ++;
@@ -270,27 +262,24 @@ void customer (FILE *fp, char *outName){
               header.blockSize = header.tupleNum * 10;
               fwrite(&header,sizeof(struct columnHeader),1,out[3]);
             }
-            int c_city = strtol(data, NULL, 10);
-            /*strcpy(tmp.c_city,data);*/
-            fwrite(&(c_city),sizeof(int), 1, out[3]);
+            strcpy(tmp.c_city,data);
+            fwrite(&(tmp.c_city),sizeof(tmp.c_city), 1, out[3]);
             break;
            case 4:
             if(writeHeader == 1){
               header.blockSize = header.tupleNum * 15;
               fwrite(&header,sizeof(struct columnHeader),1,out[4]);
             }
-            int c_nation = strtol(data, NULL, 10);
-            /*strcpy(tmp.c_nation,data);*/
-            fwrite(&(c_nation),sizeof(int), 1, out[4]);
+            strcpy(tmp.c_nation,data);
+            fwrite(&(tmp.c_nation),sizeof(tmp.c_nation), 1, out[4]);
             break;
            case 5:
             if(writeHeader == 1){
               header.blockSize = header.tupleNum * 12;
               fwrite(&header,sizeof(struct columnHeader),1,out[5]);
             }
-            int c_region= strtol(data, NULL, 10);
-            /*strcpy(tmp.c_region,data);*/
-            fwrite(&(c_region),sizeof(int), 1, out[5]);
+            strcpy(tmp.c_region,data);
+            fwrite(&(tmp.c_region),sizeof(tmp.c_region), 1, out[5]);
             break;
            case 6:
             if(writeHeader == 1){
@@ -328,8 +317,8 @@ void customer (FILE *fp, char *outName){
 
 }
 
-// fp路径为"tpch/data/s*/part.tbl", outName = "PART"
 void part (FILE *fp, char *outName){
+
   struct part tmp;
   char data [1024] = {0};
   char buf[1024] = {0};
@@ -363,24 +352,24 @@ void part (FILE *fp, char *outName){
   header.blockId = 0;
   header.blockTotal = (tupleNum + BLOCKNUM -1) / BLOCKNUM ;
   fseek(fp,0,SEEK_SET);
-/*  header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[0]);*/
-  /*header.blockSize = header.tupleNum * 22;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[1]);*/
-  /*header.blockSize = header.tupleNum * 6;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[2]);*/
-  /*header.blockSize = header.tupleNum * 7;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[3]);*/
-  /*header.blockSize = header.tupleNum * 9;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[4]);*/
-  /*header.blockSize = header.tupleNum * 11;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[5]);*/
-  /*header.blockSize = header.tupleNum * 25;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[6]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[7]);*/
-  /*header.blockSize = header.tupleNum * 10;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[8]);*/
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[0]);
+  header.blockSize = header.tupleNum * 22;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[1]);
+  header.blockSize = header.tupleNum * 6;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[2]);
+  header.blockSize = header.tupleNum * 7;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[3]);
+  header.blockSize = header.tupleNum * 9;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[4]);
+  header.blockSize = header.tupleNum * 11;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[5]);
+  header.blockSize = header.tupleNum * 25;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[6]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[7]);
+  header.blockSize = header.tupleNum * 10;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[8]);
   while(fgets(buf,sizeof(buf),fp)!= NULL){
     int writeHeader = 0;
     tupleCount ++;
@@ -422,27 +411,24 @@ void part (FILE *fp, char *outName){
               header.blockSize = header.tupleNum * 6;
               fwrite(&header,sizeof(struct columnHeader),1,out[2]);
             }
-            int p_mfgr = strtol(data, NULL, 10);
-            /*strcpy(tmp.p_mfgr,data);*/
-            fwrite(&(p_mfgr),sizeof(int), 1, out[2]);
+            strcpy(tmp.p_mfgr,data);
+            fwrite(&(tmp.p_mfgr),sizeof(tmp.p_mfgr), 1, out[2]);
             break;
            case 3:
             if(writeHeader == 1){
               header.blockSize = header.tupleNum * 7;
               fwrite(&header,sizeof(struct columnHeader),1,out[3]);
             }
-            int p_category = strtol(data, NULL, 10);
-            /*strcpy(tmp.p_category,data);*/
-            fwrite(&(p_category),sizeof(int), 1, out[3]);
+            strcpy(tmp.p_category,data);
+            fwrite(&(tmp.p_category),sizeof(tmp.p_category), 1, out[3]);
             break;
            case 4:
             if(writeHeader == 1){
               header.blockSize = header.tupleNum * 9;
               fwrite(&header,sizeof(struct columnHeader),1,out[4]);
             }
-            int p_brand1 = strtol(data, NULL, 10);
-            /*strcpy(tmp.p_brand1,data);*/
-            fwrite(&(p_brand1),sizeof(int), 1, out[4]);
+            strcpy(tmp.p_brand1,data);
+            fwrite(&(tmp.p_brand1),sizeof(tmp.p_brand1), 1, out[4]);
             break;
            case 5:
             if(writeHeader == 1){
@@ -496,8 +482,8 @@ void part (FILE *fp, char *outName){
 
 }
 
-// fp路径为"tpch/data/s*/ddate.tbl", outName = "DDATE"
 void ddate (FILE *fp, char *outName){
+
   struct ddate tmp;
   char data [1024] = {0};
   char buf[1024] = {0};
@@ -531,40 +517,40 @@ void ddate (FILE *fp, char *outName){
   header.blockId = 0;
   header.blockTotal = (tupleNum + BLOCKNUM -1) / BLOCKNUM ;
   fseek(fp,0,SEEK_SET);
-/*  header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[0]);*/
-  /*header.blockSize = header.tupleNum * 18;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[1]);*/
-  /*header.blockSize = header.tupleNum * 8;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[2]);*/
-  /*header.blockSize = header.tupleNum * 9;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[3]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[4]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[5]);*/
-  /*header.blockSize = header.tupleNum * 7;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[6]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[7]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[8]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[9]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[10]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[11]);*/
-  /*header.blockSize = header.tupleNum * 12;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[12]);*/
-  /*header.blockSize = header.tupleNum * 1;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[13]);*/
-  /*header.blockSize = header.tupleNum * 1;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[14]);*/
-  /*header.blockSize = header.tupleNum * 1;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[15]);*/
-  /*header.blockSize = header.tupleNum * 1;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[16]);*/
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[0]);
+  header.blockSize = header.tupleNum * 18;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[1]);
+  header.blockSize = header.tupleNum * 8;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[2]);
+  header.blockSize = header.tupleNum * 9;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[3]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[4]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[5]);
+  header.blockSize = header.tupleNum * 7;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[6]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[7]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[8]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[9]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[10]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[11]);
+  header.blockSize = header.tupleNum * 12;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[12]);
+  header.blockSize = header.tupleNum * 1;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[13]);
+  header.blockSize = header.tupleNum * 1;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[14]);
+  header.blockSize = header.tupleNum * 1;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[15]);
+  header.blockSize = header.tupleNum * 1;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[16]);
   while(fgets(buf,sizeof(buf),fp)!= NULL){
     int writeHeader = 0;
     tupleCount ++;
@@ -741,8 +727,8 @@ void ddate (FILE *fp, char *outName){
 
 }
 
-// fp路径为"tpch/data/s*/lineorder.tbl", outName = "LINEORDER"
 void lineorder (FILE *fp, char *outName){
+
   struct lineorder tmp;
   char data [1024] = {0};
   char buf[1024] = {0};
@@ -776,40 +762,40 @@ void lineorder (FILE *fp, char *outName){
   header.blockId = 0;
   header.blockTotal = (tupleNum + BLOCKNUM -1) / BLOCKNUM ;
   fseek(fp,0,SEEK_SET);
-/*  header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[0]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[1]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[2]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[3]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[4]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[5]);*/
-  /*header.blockSize = header.tupleNum * 16;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[6]);*/
-  /*header.blockSize = header.tupleNum * 1;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[7]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[8]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[9]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[10]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[11]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[12]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[13]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[14]);*/
-  /*header.blockSize = header.tupleNum * sizeof(int);*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[15]);*/
-  /*header.blockSize = header.tupleNum * 10;*/
-  /*fwrite(&header, sizeof(struct columnHeader), 1, out[16]);*/
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[0]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[1]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[2]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[3]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[4]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[5]);
+  header.blockSize = header.tupleNum * 16;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[6]);
+  header.blockSize = header.tupleNum * 1;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[7]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[8]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[9]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[10]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[11]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[12]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[13]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[14]);
+  header.blockSize = header.tupleNum * sizeof(int);
+  fwrite(&header, sizeof(struct columnHeader), 1, out[15]);
+  header.blockSize = header.tupleNum * 10;
+  fwrite(&header, sizeof(struct columnHeader), 1, out[16]);
   while(fgets(buf,sizeof(buf),fp)!= NULL){
     int writeHeader = 0;
     tupleCount ++;
@@ -987,6 +973,7 @@ void lineorder (FILE *fp, char *outName){
 }
 
 int main(int argc, char ** argv){
+
   FILE * in = NULL, *out = NULL;
   int table;
   int setPath = 0;
@@ -1008,7 +995,6 @@ int main(int argc, char ** argv){
     switch(table){
       case '6':
         setPath = 1;
-        // path = "../data/s*_columnar/"
         strcpy(path,optarg);
         break;
     }
@@ -1016,12 +1002,10 @@ int main(int argc, char ** argv){
 
   optind=1;
 
-  // cwd = "tpch/data/s*/"
   getcwd(cwd,PATH_MAX);
   while((table=getopt_long(argc,argv,"",long_options,&long_index))!=-1){
     switch(table){
       case '0':
-        // optarg = "tpch/data/s*/supplier.tbl"
         in = fopen(optarg,"r");
         if(!in){
           printf("Failed to open %s\n",optarg);

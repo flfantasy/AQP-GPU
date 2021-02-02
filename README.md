@@ -61,8 +61,8 @@ cd ../../
 
 # Generate the test data and transform into columnar layout
 # Substitute <SF> with appropriate scale factor (eg: 1)
-python util.py ssb <SF> gen
-python util.py ssb <SF> transform
+python3 util.py ssb <SF> gen
+python3 util.py ssb <SF> transform
 ```
 
 * Configure the benchmark settings
@@ -77,3 +77,19 @@ make bin/ssb/q11
 ./bin/ssb/q11
 ```
 
+SSB tables(star schema):
+lineorder.tbl
+|--customer.tbl
+|--date.tbl
+|--part.tbl
+|--supplier.tbl
+
+TPCH tables(snowflake schema):
+lineitem.tbl
+|--partsupp.tbl
+   |--part.tbl
+   |--supplier.tbl--|
+|--orders.tbl       |
+   |--customer.tbl--|
+                    |--nation.tbl
+                       |--region.tbl
