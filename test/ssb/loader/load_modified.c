@@ -19,7 +19,7 @@
 
 static char delimiter = '|';
 
-// fp路径为"tpch/data/s*/supplier.tbl", outName = "SUPPLIER"
+// fp路径为"tpch/data/s*/supplier.tbl.p", outName = "SUPPLIER"
 void supplier (FILE *fp, char *outName){
   struct supplier tmp;
   char data [1024] = {0};
@@ -87,11 +87,12 @@ void supplier (FILE *fp, char *outName){
     for(i = 0, prev = 0,count=0; buf[i] !='\n';i++){
       if (buf[i] == delimiter){
         memset(data,0,sizeof(data));
-        // get the data of one column
+        // 得到某一列的数据
         strncpy(data,buf+prev,i-prev);
         prev = i+1;
         switch(count){
            case 0:
+            // 处理 s_suppkey 列
             if(writeHeader == 1){
               header.blockSize = header.tupleNum * sizeof(int);
               fwrite(&header,sizeof(struct columnHeader),1,out[0]);
@@ -154,6 +155,7 @@ void supplier (FILE *fp, char *outName){
         count++;
       }
     }
+    // 为了防止以"\n"作为行间隔造成最后一列未处理。正常应该以"|\n"作为行间隔。
     if(count == 6){
       if(writeHeader == 1){
         header.blockSize = header.tupleNum * 15;
@@ -170,7 +172,7 @@ void supplier (FILE *fp, char *outName){
 
 }
 
-// fp路径为"tpch/data/s*/customer.tbl", outName = "CUSTOMER"
+// fp路径为"tpch/data/s*/customer.tbl.p", outName = "CUSTOMER"
 void customer (FILE *fp, char *outName){
   struct customer tmp;
   char data [1024] = {0};
@@ -328,7 +330,7 @@ void customer (FILE *fp, char *outName){
 
 }
 
-// fp路径为"tpch/data/s*/part.tbl", outName = "PART"
+// fp路径为"tpch/data/s*/part.tbl.p", outName = "PART"
 void part (FILE *fp, char *outName){
   struct part tmp;
   char data [1024] = {0};
@@ -1016,12 +1018,12 @@ int main(int argc, char ** argv){
 
   optind=1;
 
-  // cwd = "tpch/data/s*/"
+  // cwd = "tpch/loader/"
   getcwd(cwd,PATH_MAX);
   while((table=getopt_long(argc,argv,"",long_options,&long_index))!=-1){
     switch(table){
       case '0':
-        // optarg = "tpch/data/s*/supplier.tbl"
+        // optarg = "tpch/data/s*/supplier.tbl.p"
         in = fopen(optarg,"r");
         if(!in){
           printf("Failed to open %s\n",optarg);
@@ -1037,6 +1039,7 @@ int main(int argc, char ** argv){
         fclose(in);
         break;
       case '1':
+        // optarg = "tpch/data/s*/customer.tbl.p"
         in = fopen(optarg,"r");
         if(!in){
           printf("Failed to open %s\n",optarg);
@@ -1052,6 +1055,7 @@ int main(int argc, char ** argv){
         fclose(in);
         break;
       case '2':
+        // optarg = "tpch/data/s*/part.tbl.p"
         in = fopen(optarg,"r");
         if(!in){
           printf("Failed to open %s\n",optarg);
@@ -1067,6 +1071,7 @@ int main(int argc, char ** argv){
         fclose(in);
         break;
       case '3':
+        // optarg = "tpch/data/s*/ddate.tbl"
         in = fopen(optarg,"r");
         if(!in){
           printf("Failed to open %s\n",optarg);
@@ -1082,6 +1087,7 @@ int main(int argc, char ** argv){
         fclose(in);
         break;
       case '4':
+        // optarg = "tpch/data/s*/lineorder.tbl"
         in = fopen(optarg,"r");
         if(!in){
           printf("Failed to open %s\n",optarg);

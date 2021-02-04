@@ -32,9 +32,8 @@ def transform(dataset, scale_factor):
         # 将行式存储转换为列式存储
         if dataset == 'ssb':
             os.system('./loader --lineorder %s/lineorder.tbl --ddate %s/date.tbl --customer %s/customer.tbl.p --supplier %s/supplier.tbl.p --part %s/part.tbl.p --datadir %s' % (ip, ip, ip, ip, ip, op))
-        else :
-            // todo:改为tpch的loader参数
-            os.system('./loader --lineorder %s/lineorder.tbl --ddate %s/date.tbl --customer %s/customer.tbl.p --supplier %s/supplier.tbl.p --part %s/part.tbl.p --datadir %s' % (ip, ip, ip, ip, ip, op))
+        else :  # tpch
+            os.system('./loader --lineitem %s/lineitem.tbl.p --orders %s/orders.tbl.p --customer %s/customer.tbl.p --part %s/part.tbl.p --partsupp %s/partsupp.tbl --supplier %s/supplier.tbl.p --nation %s/nation.tbl.p --region %s/region.tbl.p --datadir %s' % (ip, ip, ip, ip, ip, ip, ip, ip, op))
 
 
 if __name__ == "__main__":

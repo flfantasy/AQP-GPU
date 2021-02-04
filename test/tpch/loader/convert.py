@@ -126,7 +126,7 @@ if __name__ == '__main__':
         try:
             # 1->n_name
             parts = line.split('|')
-            parts[1] = str(n_name.index(parts[1]))
+            parts[1] = parts[0]
             o.append('|'.join(parts))
         except:
             print(line)
@@ -144,7 +144,7 @@ if __name__ == '__main__':
         try:
             # 1->r_name
             parts = line.split('|')
-            parts[1] = str(r_name.index(parts[1]))
+            parts[1] = parts[0]
             o.append('|'.join(parts))
         except:
             print(line)
