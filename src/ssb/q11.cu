@@ -8,9 +8,8 @@
 #include <cuda.h>
 #include <cub/util_allocator.cuh>
 #include "cub/test/test_util.h"
-
+#include <hyperapi/hyperapi.hpp>
 #include "crystal/crystal.cuh"
-
 #include "gpu_utils.h"
 #include "ssb_utils.h"
 
@@ -25,7 +24,9 @@ cub::CachingDeviceAllocator  g_allocator(true);  // Caching allocator for device
 template<int BLOCK_THREADS, int ITEMS_PER_THREAD>
 __global__ void QueryKernel(int* lo_orderdate, int* lo_discount, int* lo_quantity, int* lo_extendedprice,
     int lo_num_entries, unsigned long long* revenue) {
-  // Load a segment of consecutive items that are blocked across threads
+  // items表示某一列中由这个thread处理的几行
+  // items表示另一列中由这个thread处理的几行
+  // selection_flags是一个bitmap，表示是否通过过滤
   int items[ITEMS_PER_THREAD];
   int selection_flags[ITEMS_PER_THREAD];
   int items2[ITEMS_PER_THREAD];
@@ -34,7 +35,7 @@ __global__ void QueryKernel(int* lo_orderdate, int* lo_discount, int* lo_quantit
 
   // 当前tile在整个数组中的offset
   int tile_offset = blockIdx.x * TILE_SIZE;
-  // tile的数量
+  // tile的数量，lo_num_entries/TILE_SIZE 向上取整
   int num_tiles = (lo_num_entries + TILE_SIZE - 1) / TILE_SIZE;
   // 当前tile内有多少items
   int num_tile_items = TILE_SIZE;
@@ -59,7 +60,7 @@ __global__ void QueryKernel(int* lo_orderdate, int* lo_discount, int* lo_quantit
   // lo_extendedprice
   BlockLoad<int, BLOCK_THREADS, ITEMS_PER_THREAD>(lo_extendedprice + tile_offset, items2, num_tile_items);
 
-  // 计算一个tile（128 * 4）的sum
+  // 计算一个thread的sum
   #pragma unroll
   for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ++ITEM)
   {
@@ -73,6 +74,7 @@ __global__ void QueryKernel(int* lo_orderdate, int* lo_discount, int* lo_quantit
   // buffer用于存储每个warp的sum，最多支持32个warp
   static __shared__ long long buffer[32];
   
+  // 计算整个block的sum
   unsigned long long aggregate = BlockSum<long long, BLOCK_THREADS, ITEMS_PER_THREAD>(sum, (long long*)buffer);
   __syncthreads();
 
@@ -119,11 +121,11 @@ float runQuery(int* lo_orderdate, int* lo_discount, int* lo_quantity, int* lo_ex
 
   // diff = kernel执行时间 + gpu结果传回cpu时间
   cout << "Revenue: " << revenue << endl;
-  cout << "Time Taken Total: " << diff.count() * 1000 << endl;
+  cout << "Time Taken Total: " << diff.count() * 1000 << "ms" << endl;
 
   CLEANUP(d_sum);
   return time_query;
-
+}
 /**
  * Main
  */
@@ -175,7 +177,7 @@ int main(int argc, char** argv)
     time_query = runQuery(d_lo_orderdate, d_lo_discount, d_lo_quantity, d_lo_extendedprice, LO_LEN, g_allocator);
     cout<< "{"
         << "\"query\":11" 
-        << ",\"time_query\":" << time_query
+        << ",\"time_query\":" << time_query << "ms"
         << "}" << endl;
   }
 

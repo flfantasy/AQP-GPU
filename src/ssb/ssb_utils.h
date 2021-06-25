@@ -18,6 +18,11 @@ using namespace std;
 #define S_LEN 2000
 #define C_LEN 30000
 #define D_LEN 2556
+#define P_SLOT_LEN P_LEN
+#define S_SLOT_LEN S_LEN
+#define C_SLOT_LEN C_LEN
+#define D_SLOT_LEN (19981230 - 19920101 + 1)
+#define D_VAL_MIN 19920101
 #elif SF == 10
 #define DATA_DIR BASE_PATH "s10_columnar/"
 #define LO_LEN 59986214

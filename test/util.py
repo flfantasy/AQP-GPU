@@ -17,7 +17,10 @@ def gen_data(dataset, scale_factor):
     path = './' + dataset + '/dbgen/'
     with cd(path):
         os.system('rm -rf *.tbl')
-        os.system('./dbgen -s %d' % scale_factor)
+        if dataset == 'ssb':
+            os.system('./dbgen -s %d -T a' % scale_factor)
+        else :  # tpch
+            os.system('./dbgen -s %d' % scale_factor)
         os.system('mkdir -p ../data/s%d' % scale_factor)
         os.system('mv *.tbl ../data/s%d/' % scale_factor)
 

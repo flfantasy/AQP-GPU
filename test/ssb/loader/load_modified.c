@@ -290,7 +290,7 @@ void customer (FILE *fp, char *outName){
               header.blockSize = header.tupleNum * 12;
               fwrite(&header,sizeof(struct columnHeader),1,out[5]);
             }
-            int c_region= strtol(data, NULL, 10);
+            int c_region = strtol(data, NULL, 10);
             /*strcpy(tmp.c_region,data);*/
             fwrite(&(c_region),sizeof(int), 1, out[5]);
             break;
@@ -425,7 +425,6 @@ void part (FILE *fp, char *outName){
               fwrite(&header,sizeof(struct columnHeader),1,out[2]);
             }
             int p_mfgr = strtol(data, NULL, 10);
-            /*strcpy(tmp.p_mfgr,data);*/
             fwrite(&(p_mfgr),sizeof(int), 1, out[2]);
             break;
            case 3:
@@ -434,7 +433,6 @@ void part (FILE *fp, char *outName){
               fwrite(&header,sizeof(struct columnHeader),1,out[3]);
             }
             int p_category = strtol(data, NULL, 10);
-            /*strcpy(tmp.p_category,data);*/
             fwrite(&(p_category),sizeof(int), 1, out[3]);
             break;
            case 4:
@@ -443,7 +441,6 @@ void part (FILE *fp, char *outName){
               fwrite(&header,sizeof(struct columnHeader),1,out[4]);
             }
             int p_brand1 = strtol(data, NULL, 10);
-            /*strcpy(tmp.p_brand1,data);*/
             fwrite(&(p_brand1),sizeof(int), 1, out[4]);
             break;
            case 5:
@@ -696,32 +693,32 @@ void ddate (FILE *fp, char *outName){
               header.blockSize = header.tupleNum * 1;
               fwrite(&header,sizeof(struct columnHeader),1,out[13]);
             }
-            strcpy(tmp.d_lastdayinweekfl,data);
-            fwrite(&(tmp.d_lastdayinweekfl),sizeof(tmp.d_lastdayinweekfl), 1, out[13]);
+            tmp.d_lastdayinweekfl = strtol(data,NULL,10);
+            fwrite(&(tmp.d_lastdayinweekfl),sizeof(int), 1, out[13]);
             break;
            case 14:
             if(writeHeader == 1){
               header.blockSize = header.tupleNum * 1;
               fwrite(&header,sizeof(struct columnHeader),1,out[14]);
             }
-            strcpy(tmp.d_lastdayinmonthfl,data);
-            fwrite(&(tmp.d_lastdayinmonthfl),sizeof(tmp.d_lastdayinmonthfl), 1, out[14]);
+            tmp.d_lastdayinmonthfl = strtol(data,NULL,10);
+            fwrite(&(tmp.d_lastdayinmonthfl),sizeof(int), 1, out[14]);
             break;
            case 15:
             if(writeHeader == 1){
               header.blockSize = header.tupleNum * 1;
               fwrite(&header,sizeof(struct columnHeader),1,out[15]);
             }
-            strcpy(tmp.d_holidayfl,data);
-            fwrite(&(tmp.d_holidayfl),sizeof(tmp.d_holidayfl), 1, out[15]);
+            tmp.d_holidayfl = strtol(data,NULL,10);
+            fwrite(&(tmp.d_holidayfl),sizeof(int), 1, out[15]);
             break;
            case 16:
             if(writeHeader == 1){
               header.blockSize = header.tupleNum * 1;
               fwrite(&header,sizeof(struct columnHeader),1,out[16]);
             }
-            strcpy(tmp.d_weekdayfl,data);
-            fwrite(&(tmp.d_weekdayfl),sizeof(tmp.d_weekdayfl), 1, out[16]);
+            tmp.d_weekdayfl = strtol(data,NULL,10);
+            fwrite(&(tmp.d_weekdayfl),sizeof(int), 1, out[16]);
             break;
         }
         count++;
@@ -732,8 +729,8 @@ void ddate (FILE *fp, char *outName){
         header.blockSize = header.tupleNum * 1;
         fwrite(&header,sizeof(struct columnHeader),1,out[16]);
       }
-      strncpy(tmp.d_weekdayfl,buf+prev,i-prev);
-      fwrite(&(tmp.d_weekdayfl),sizeof(tmp.d_weekdayfl), 1, out[16]);
+      tmp.d_weekdayfl = strtol(data,NULL,10);
+      fwrite(&(tmp.d_weekdayfl),sizeof(int), 1, out[16]);
     }
   }
 
@@ -893,8 +890,8 @@ void lineorder (FILE *fp, char *outName){
               header.blockSize = header.tupleNum * 1;
               fwrite(&header,sizeof(struct columnHeader),1,out[7]);
             }
-            strcpy(tmp.lo_shippriority,data);
-            fwrite(&(tmp.lo_shippriority),sizeof(tmp.lo_shippriority), 1, out[7]);
+            tmp.lo_shippriority = strtol(data,NULL,10);
+            fwrite(&(tmp.lo_shippriority),sizeof(int), 1, out[7]);
             break;
            case 8:
             if(writeHeader == 1){

@@ -34,12 +34,12 @@ __device__ __forceinline__ void BlockLoadDirect(
   }
 }
 
-// 根据num_items是否足够一个tile的数量，调用不同的BlockLoadDirect
+// 根据tile容量是否是一个标准tile的容量，调用不同的BlockLoadDirect
 template<typename T, int BLOCK_THREADS, int ITEMS_PER_THREAD>
 __device__ __forceinline__ void BlockLoad(
     T* inp,          // load的起始位置
     T  (&items)[ITEMS_PER_THREAD],    // 目标数组
-    int num_items
+    int num_items     //当前tile有多少item
     ) {
   T* block_itr = inp;
 

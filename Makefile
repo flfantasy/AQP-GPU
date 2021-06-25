@@ -4,8 +4,8 @@ CUDA_BIN_PATH   ?= $(CUDA_PATH)/bin
 
 NVCC = nvcc
 
-SM_TARGETS   = -gencode=arch=compute_52,code=\"sm_52,compute_52\" 
-SM_DEF     = -DSM520
+SM_TARGETS   = -gencode=arch=compute_75,code=\"sm_75,compute_75\" 
+SM_DEF     = -DSM750
 
 #SM_TARGETS   = -gencode=arch=compute_70,code=\"sm_70,compute_70\" 
 #SM_DEF     = -DSM700
@@ -27,8 +27,11 @@ INCLUDES = -I$(CUB_DIR) -I$(CUB_DIR)test -I. -I$(INC)
 $(OBJ)/%.o: $(SRC)/%.cu
 	$(NVCC) -lcurand $(SM_TARGETS) $(NVCCFLAGS) $(CPU_ARCH) $(INCLUDES) $(LIBS) -O3 -dc $< -o $@
 
+$(BIN)/%: $(SRC)/%.cpp
+	g++ -o $@ -isystem /home/zhaoh/crystal/hyper/include -Wl,-rpath,/home/zhaoh/crystal/hyper/lib $< /home/zhaoh/crystal/hyper/lib/libtableauhyperapi.so
+
 $(BIN)/%: $(OBJ)/%.o
-	$(NVCC) $(SM_TARGETS) -lcurand $^ -o $@
+	$(NVCC)  $(SM_TARGETS) -lcurand $^ -o $@
 
 setup:
 	if [ ! -d "cub"  ]; then \

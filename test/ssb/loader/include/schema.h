@@ -5,9 +5,9 @@
 		int s_suppkey;
 		char s_name[25];
 		char s_address[25];
-		char s_city[10];
-		char s_nation[15];
-		char s_region[12];
+		int s_cit;
+		int s_nation;
+		int s_region;
 		char s_phone[15];
 	};
 
@@ -15,9 +15,9 @@
 		int c_custkey;
 		char c_name[25];
 		char c_address[25];
-		char c_city[10];
-		char c_nation[15];
-		char c_region[12];
+		int c_city;
+		int c_nation;
+		int c_region;
 		char c_phone[15];
 		char c_mktsegment[10];
 	};
@@ -25,9 +25,9 @@
 	struct part {
 		int p_partkey;
 		char p_name[22];
-		char p_mfgr[6];
-		char p_category[7];
-		char p_brand1[9];
+		int p_mfgr;
+		int p_category;
+		int p_brand1;
 		char p_color[11];
 		char p_type[25];
 		int p_size;
@@ -48,10 +48,10 @@
 		int d_monthnuminyear;
 		int d_weeknuminyear;
 		char d_sellingseason[12];
-		char d_lastdayinweekfl[1];
-		char d_lastdayinmonthfl[1];
-		char d_holidayfl[1];
-		char d_weekdayfl[1];
+		int d_lastdayinweekfl;
+		int d_lastdayinmonthfl;
+		int d_holidayfl;
+		int d_weekdayfl;
 	};
 
 	struct lineorder {
@@ -62,7 +62,7 @@
 		int lo_suppkey;
 		int lo_orderdate;
 		char lo_orderpriority[16];
-		char lo_shippriority[1];
+		int lo_shippriority;
 		int lo_quantity;
 		int lo_extendedprice;
 		int lo_ordtotalprice;
