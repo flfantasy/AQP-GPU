@@ -1,4 +1,4 @@
-#define TIMES 128
+#define TIMES 100
 
 #include <string>
 #include <time.h>
@@ -12,6 +12,8 @@
 #include <chrono>
 #include "ssb_utils.h"
 using namespace std;
+
+double total_time = 0;
 
 static hyperapi::TableDefinition bootstrapTable{
   "lineorder_bs",
@@ -85,6 +87,7 @@ static void resample(string pathToDatabase){
     }
   }
   cout << "Time Taken(resample): " << total.count() * 1000 << "ms" << endl;
+  total_time += total.count();
 }
 
 static void run(string pathToDatabase){
@@ -133,6 +136,7 @@ static void run(string pathToDatabase){
 
     cout << sum << "(" << (double)(bs_sum[1]-sum)/sum << "," << (double)(bs_sum[TIMES-2]-sum)/sum << ")" << endl;
     cout << "Time Taken(run query): " << diff.count() * 1000 << "ms" << endl;
+    total_time += diff.count();
   }
 }
 
@@ -144,5 +148,6 @@ int main(int argc, char** argv) {
   run(pathToDatabase);
   // 删除残留hyper文件
   system("rm /home/zhaoh/crystal/test/ssb/data/s1.hyper.q11");
+  cout << "total time: " << total_time * 1000 << "ms" << endl;
   return 0;
 }

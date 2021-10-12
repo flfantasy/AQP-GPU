@@ -1,5 +1,6 @@
-loader: load_modified.c hyper_loader.cpp hyper_read.cpp
+loader: load_modified.c hyper_loader.cpp hyper_read.cpp multinomial_test.cpp
 	gcc -o loader load_modified.c
+	g++ -o multinomial_test `gsl-config --cflags` multinomial_test.cpp `gsl-config --libs`
 	g++ -o hyperLoader -isystem /home/zhaoh/crystal/hyper/include -Wl,-rpath,/home/zhaoh/crystal/hyper/lib hyper_loader.cpp /home/zhaoh/crystal/hyper/lib/libtableauhyperapi.so
 	g++ -o hyper_read -isystem /home/zhaoh/crystal/hyper/include -Wl,-rpath,/home/zhaoh/crystal/hyper/lib hyper_read.cpp /home/zhaoh/crystal/hyper/lib/libtableauhyperapi.so
 

@@ -55,10 +55,10 @@ static __device__ __inline__ uint32_t __mywarpid(){
 }
 
 static __device__ __inline__ uint32_t __mylaneid(){    
-  uint32_t laneid;    
+  uint32_t laneid;
   asm volatile("mov.u32 %0, %%laneid;" : "=r"(laneid));    
   return laneid;
-  }
+}
 
 __global__ void  curandGenKernel(curandState *curand_states,long clock_for_rand) {
   for(int i = 0; i < MAX_CONCURRENT_THREADS; i++) {

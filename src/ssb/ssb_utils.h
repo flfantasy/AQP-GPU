@@ -23,6 +23,20 @@ using namespace std;
 #define C_SLOT_LEN C_LEN
 #define D_SLOT_LEN (19981230 - 19920101 + 1)
 #define D_VAL_MIN 19920101
+#elif SF == 2
+#define DATA_DIR BASE_PATH "s2_columnar/"
+#define LO_LEN 11998051
+#define P_LEN 400000
+#define S_LEN 4000
+#define C_LEN 60000
+#define D_LEN 2556
+#elif SF == 5
+#define DATA_DIR BASE_PATH "s5_columnar/"
+#define LO_LEN 29999810
+#define P_LEN 600000
+#define S_LEN 10000
+#define C_LEN 150000
+#define D_LEN 2556
 #elif SF == 10
 #define DATA_DIR BASE_PATH "s10_columnar/"
 #define LO_LEN 59986214

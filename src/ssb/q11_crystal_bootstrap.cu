@@ -1,6 +1,6 @@
 // Ensure printing of CUDA runtime errors to console
 #define CUB_STDERR
-#define TIMES 128
+#define TIMES 100
 #define THREADS_PER_BLOCK 32
 #define NUM_SM 72
 #define WARPS_PER_SM 32
@@ -75,7 +75,7 @@ __global__ void create_BS_sample(
 // 进行一次BS试验的查询部分，使用crystal
 template<int BLOCK_THREADS, int ITEMS_PER_THREAD>
 __global__ void queryKernel(int* lo_orderdate, int* lo_discount, int* lo_quantity, int* lo_extendedprice,
-    unsigned long long* revenue) {
+    unsigned long long* res) {
   // items1表示某一列中由这个thread处理的几行
   // items2表示另一列中由这个thread处理的几行
   // selection_flags是一个bitmap，表示是否通过过滤
@@ -130,7 +130,7 @@ __global__ void queryKernel(int* lo_orderdate, int* lo_discount, int* lo_quantit
   __syncthreads();
 
   if (threadIdx.x == 0) {
-    atomicAdd(revenue, aggregate);
+    atomicAdd(res, aggregate);
   }
 }
 
@@ -157,11 +157,13 @@ void run(int* h_lo_orderdate, int* h_lo_discount, int* h_lo_quantity, int* h_lo_
   cudaMemset(bs_lo_extendedprice, 0, LO_LEN * sizeof(int));
 
   // 记录TIMES次bootstarp的sum
-  unsigned long long* d_sum = NULL;
-  unsigned long long* d_bs_sum = NULL;
-  CubDebugExit(g_allocator.DeviceAllocate((void**)&d_sum, sizeof(unsigned long long)));
-  CubDebugExit(g_allocator.DeviceAllocate((void**)&d_bs_sum, TIMES * sizeof(unsigned long long)));
-  cudaMemset(d_bs_sum, 0, TIMES * sizeof(unsigned long long));
+  unsigned long long* d_res = NULL;
+  unsigned long long* d_bs_res = NULL;
+  CubDebugExit(g_allocator.DeviceAllocate((void**)&d_res, sizeof(unsigned long long)));
+  CubDebugExit(g_allocator.DeviceAllocate((void**)&d_bs_res, TIMES * sizeof(unsigned long long)));
+  cudaMemset(d_bs_res, 0, TIMES * sizeof(unsigned long long));
+  unsigned long long h_res;
+  unsigned long long h_bs_res[TIMES];
 
   // cuda注册start、stop事件，用于计时
   cudaEvent_t start, stop;
@@ -181,10 +183,6 @@ void run(int* h_lo_orderdate, int* h_lo_discount, int* h_lo_quantity, int* h_lo_
   cudaEventElapsedTime(&unit_time, start, stop);
   time1 += unit_time;
 
-  cudaEvent_t start1, stop1, stop2;
-  cudaEventCreate(&start1);
-  cudaEventCreate(&stop1);
-  cudaEventCreate(&stop2);
   cout << "TIMES: " << TIMES << "[";
   for (int i = 0; i < TIMES; i++) {
     cudaEventRecord(start, 0);
@@ -202,7 +200,7 @@ void run(int* h_lo_orderdate, int* h_lo_discount, int* h_lo_quantity, int* h_lo_
     {
       int tile_items = 128*4;
       int num_blocks = (LO_LEN - 1) / tile_items + 1;
-      queryKernel<128,4><<<num_blocks, 128>>>(bs_lo_orderdate, bs_lo_discount, bs_lo_quantity, bs_lo_extendedprice, d_bs_sum+i);
+      queryKernel<128,4><<<num_blocks, 128>>>(bs_lo_orderdate, bs_lo_discount, bs_lo_quantity, bs_lo_extendedprice, d_bs_res+i);
     }
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
@@ -212,29 +210,24 @@ void run(int* h_lo_orderdate, int* h_lo_discount, int* h_lo_quantity, int* h_lo_
   cout << "]" << endl;
   cout << "Time Taken(resample): " << time1 << "ms" << endl;
 
-
-  int tile_items = 128*4;
-  int num_blocks = (LO_LEN - 1) / tile_items + 1;
-  queryKernel<128,4><<<num_blocks, 128>>>(d_lo_orderdate, d_lo_discount, d_lo_quantity, d_lo_extendedprice, d_sum);
-
   cudaEventRecord(start, 0);
-  unsigned long long h_sum;
-  unsigned long long h_bs_sum[TIMES];
-  CubDebugExit(cudaMemcpy(&h_sum, d_sum, sizeof(unsigned long long), cudaMemcpyDeviceToHost));
-  CubDebugExit(cudaMemcpy(&h_bs_sum, d_bs_sum, TIMES * sizeof(unsigned long long), cudaMemcpyDeviceToHost));
-  sort(h_bs_sum, h_bs_sum + TIMES);
+  CubDebugExit(cudaMemcpy(&h_bs_res, d_bs_res, TIMES * sizeof(unsigned long long), cudaMemcpyDeviceToHost));
+  sort(h_bs_res, h_bs_res + TIMES);
   cudaEventRecord(stop, 0);
   cudaEventSynchronize(stop);
   cudaEventElapsedTime(&unit_time, start, stop);
   time2 += unit_time;
 
+  int tile_items = 128*4;
+  int num_blocks = (LO_LEN - 1) / tile_items + 1;
+  queryKernel<128,4><<<num_blocks, 128>>>(d_lo_orderdate, d_lo_discount, d_lo_quantity, d_lo_extendedprice, d_res);
+  CubDebugExit(cudaMemcpy(&h_res, d_res, sizeof(unsigned long long), cudaMemcpyDeviceToHost));
+
   int idx1 = TIMES * 0.01;
   int idx2 = TIMES * 0.99;
-  cout << h_sum << " (" << (double)((long long)h_bs_sum[idx1]-(long long)h_sum)/h_sum << ", " << (double)((long long)h_bs_sum[idx2]-h_sum)/h_sum << ")" << endl; 
-
+  cout << h_res << " (" << (double)((long long)h_bs_res[idx1]-(long long)h_res)/h_res << ", " << (double)((long long)h_bs_res[idx2]-h_res)/h_res << ")" << endl; 
   cout << "Time Taken(run query): " << time2 << "ms" << endl;
 
-  CLEANUP(d_bs_sum);
   CLEANUP(curand_state);
   CLEANUP(bs_lo_orderdate);
   CLEANUP(bs_lo_discount);

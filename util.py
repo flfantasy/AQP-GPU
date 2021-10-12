@@ -3,14 +3,25 @@ import os
 import time
 import sys
 
-def compile(query_num):
-    print('make bin/ssb/q' + query_num + '_hyper_bootstrap')
-    os.system('make bin/ssb/q' + query_num + '_hyper_bootstrap 1>>output.log 2>&1')
+def compile(query_num, model):
+    if model == 'cpu':
+        print('make bin/ssb/q' + query_num + '_hyper_bootstrap')
+        os.system('make bin/ssb/q' + query_num + '_hyper_bootstrap 1>>cpu_output.log 2>&1')
+    elif model == 'gpu':
+        print('make bin/ssb/q' + query_num + '_crystal_bootstrap')
+        os.system('make bin/ssb/q' + query_num + '_crystal_bootstrap 1>>gpu_output.log 2>&1')
+    else:
+        print('arguments should have "cpu" or "gpu".')
 
-
-def run(query_num):
-    print('./bin/ssb/q' + query_num + '_hyper_bootstrap')
-    os.system('./bin/ssb/q' + query_num + '_hyper_bootstrap 1>>output.log 2>&1')
+def run(query_num, model):
+    if model == 'cpu':
+        print('./bin/ssb/q' + query_num + '_hyper_bootstrap')
+        os.system('./bin/ssb/q' + query_num + '_hyper_bootstrap 1>>cpu_output.log 2>&1')
+    elif model == 'gpu':
+        print('./bin/ssb/q' + query_num + '_crystal_bootstrap')
+        os.system('./bin/ssb/q' + query_num + '_crystal_bootstrap 1>>gpu_output.log 2>&1')
+    else:
+        print('arguments should have "cpu" or "gpu".')
 
 if __name__ == "__main__":
 
@@ -29,16 +40,16 @@ if __name__ == "__main__":
     start = time.time();
     if args.a :
         for i in query_nums:
-            compile(i)
+            compile(i, args.model)
         for i in query_nums:
-            run(i)
+            run(i, args.model)
     elif args.q != None :
         for i in args.q:
-            compile(i)
+            compile(i, args.model)
         for i in args.q:
-            run(i)
+            run(i, args.model)
     else :
         print('arguments should have "-a" or "-q".')
         sys.exit()
     end = time.time()
-    print('\n\ntotal time taken: %fs' % end - start)
+    print('\n\ntotal time taken: %fs' % (end - start))

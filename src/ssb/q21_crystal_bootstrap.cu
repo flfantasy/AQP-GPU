@@ -321,8 +321,6 @@ void run(
     cout << "=" << flush;
     cudaEventRecord(start, 0);
     {
-      int tile_items = 128*4;
-      int num_blocks = (LO_LEN - 1) / tile_items + 1;
       CubDebugExit(cudaMemset(d_res, 0, res_array_size * sizeof(int)));
       queryKernel(
           bs_lo_orderdate, bs_lo_suppkey, bs_lo_partkey, bs_lo_revenue,
@@ -361,8 +359,6 @@ void run(
   time2 += unit_time;
 
   // 计算原始样本的query值
-  int tile_items = 128*4;
-  int num_blocks = (LO_LEN - 1) / tile_items + 1;
   CubDebugExit(cudaMemset(d_res, 0, res_array_size * sizeof(int)));
   queryKernel(
       d_lo_orderdate, d_lo_suppkey, d_lo_partkey, d_lo_revenue,
