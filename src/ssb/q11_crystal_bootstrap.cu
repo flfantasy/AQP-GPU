@@ -1,6 +1,6 @@
 // Ensure printing of CUDA runtime errors to console
 #define CUB_STDERR
-#define TIMES 100
+#define TIMES 1
 #define THREADS_PER_BLOCK 32
 #define NUM_SM 72
 #define WARPS_PER_SM 32

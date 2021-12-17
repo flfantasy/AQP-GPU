@@ -1,4 +1,4 @@
-#define TIMES 128
+#define TIMES 1
 
 #include <string>
 #include <time.h>
